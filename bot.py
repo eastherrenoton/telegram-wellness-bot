@@ -180,6 +180,8 @@ def setup_schedule(app):
 
 if __name__ == "__main__":
 
+    threading.Thread(target=run_web).start()
+
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(PollAnswerHandler(handle_poll_answer))
