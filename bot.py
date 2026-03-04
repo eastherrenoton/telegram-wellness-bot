@@ -1,6 +1,8 @@
 import os
 import threading
 from collections import defaultdict
+from flask import Flask
+
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -9,18 +11,34 @@ from telegram.ext import (
     filters,
     ContextTypes
 )
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from groq import Groq
 
 # =========================
-# CONFIG
+# ENV VARIABLES
 # =========================
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-GROUP_ID = -1003838176853
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+GROUP_ID = -1003838176853
+
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN not found")
+
+if not GROQ_API_KEY:
+    raise ValueError("GROQ_API_KEY not found")
+
+# =========================
+# GROQ CLIENT
+# =========================
+
 client = Groq(api_key=GROQ_API_KEY)
+
+# =========================
+# DATA STORAGE
+# =========================
 
 daily_scores = defaultdict(int)
 active_polls = {}
@@ -46,8 +64,7 @@ Friendly tone.
         model="llama-3.1-8b-instant",
     )
 
-    return chat_completion.choices[0].message.content
-
+    return chat_completion.choices[0].message.content.strip()
 
 # =========================
 # SEND POLL
@@ -65,7 +82,6 @@ async def send_poll(app, topic):
     )
 
     active_polls[poll.poll.id] = poll.message_id
-
 
 # =========================
 # POLL ANSWER HANDLER
@@ -88,7 +104,6 @@ async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE)
         text=message
     )
 
-
 # =========================
 # MESSAGE HANDLER
 # =========================
@@ -101,23 +116,27 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.lower()
     user = update.message.from_user.first_name
 
-    # 🌞 Good Morning
     if "good morning" in text:
+
         message = ai_message(f"wish {user} a positive energetic good morning")
+
         await update.message.reply_text(message)
 
-    # 🏃 Exercise detection
     elif any(word in text for word in ["gym", "exercise", "walk", "yoga"]):
+
         daily_scores[user] += 2
+
         message = ai_message(f"praise {user} for doing exercise in the morning")
+
         await update.message.reply_text(message)
 
-    # 📚 Reading detection
     elif "read" in text:
-        daily_scores[user] += 1
-        message = ai_message(f"encourage {user} for reading habit")
-        await update.message.reply_text(message)
 
+        daily_scores[user] += 1
+
+        message = ai_message(f"encourage {user} for reading habit")
+
+        await update.message.reply_text(message)
 
 # =========================
 # DAILY WINNER
@@ -139,14 +158,13 @@ async def daily_winner(app):
 
     daily_scores.clear()
 
-
 # =========================
 # SCHEDULER
 # =========================
 
 def setup_schedule(app):
 
-    scheduler = AsyncIOScheduler()
+    scheduler = AsyncIOScheduler(timezone="Asia/Kolkata")
 
     scheduler.add_job(
         send_poll,
@@ -174,15 +192,30 @@ def setup_schedule(app):
 
     scheduler.start()
 
+# =========================
+# RENDER WEB SERVER
+# =========================
+
+web_app = Flask(__name__)
+
+@web_app.route("/")
+def home():
+    return "Telegram Wellness Bot Running 🌿"
+
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    web_app.run(host="0.0.0.0", port=port)
 
 # =========================
-# MAIN (WINDOWS SAFE)
+# MAIN
 # =========================
 
 if __name__ == "__main__":
 
+    # start web server for render
     threading.Thread(target=run_web).start()
 
+    # telegram bot
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(PollAnswerHandler(handle_poll_answer))
