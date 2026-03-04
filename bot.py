@@ -180,16 +180,16 @@ def setup_schedule(app):
 
 if __name__ == "__main__":
 
-app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-app.add_handler(PollAnswerHandler(handle_poll_answer))
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    app.add_handler(PollAnswerHandler(handle_poll_answer))
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
-async def start_scheduler(application):
-    setup_schedule(application)
+    async def start_scheduler(application):
+        setup_schedule(application)
 
-app.post_init = start_scheduler
+    app.post_init = start_scheduler
 
-print("🌿 Groq Wellness Bot Running")
+    print("🌿 Groq Wellness Bot Running")
 
-app.run_polling(close_loop=False)
+    app.run_polling(close_loop=False)
