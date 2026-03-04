@@ -122,7 +122,44 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(message)
 
-    elif any(word in text for word in ["gym", "exercise", "walk", "yoga"]):
+    elif any(word in text for word in ["gym","workout","exercise","training","fitness","bodybuilding","cardio","running","jogging","sprint",
+"walk","walking","steps","cycling","biking","yoga","stretch","stretching","meditation","meditate",
+"mindfulness","breathing","pranayama","pilates","aerobics","dance","zumba","sports","badminton",
+"football","cricket","tennis","swimming","hiking","climbing","pushups","pushup","squats","plank",
+"deadlift","benchpress","lifting","weights","strength","core","abs","fitnessroutine","trainingday",
+
+"read","reading","book","books","study","studying","learning","knowledge","selflearning","research",
+"ebook","audiobook","journal","writing","notes","notetaking","revision","practice","skill","skills",
+
+"water","hydration","drinkwater","hydrate","tea","greentea","herbaltea","healthyfood","nutrition",
+"protein","vitamins","fruits","vegetables","salad","diet","balanceddiet","mealprep","breakfast",
+"healthybreakfast","lunch","dinner","snacks","smoothie",
+
+"sleep","goodsleep","earlysleep","rest","recovery","nap","relax","relaxing","calm","peace","focus",
+"productivity","planning","goals","goalsetting","journaling","gratitude","reflection","discipline",
+
+"morningroutine","eveningroutine","selfcare","wellness","mentalhealth","positivity","positive",
+"motivation","inspiration","energy","freshstart","success","growth","habit","habits","routine",
+
+"sunlight","freshair","nature","gardening","cleaning","organizing","declutter","minimalism",
+
+"brainexercise","puzzle","readinghabit","writinghabit","coding","practicecoding","designpractice",
+
+"languagelearning","englishpractice","vocabulary","speakingpractice",
+
+"musicpractice","drawing","painting","creativework","artpractice",
+
+"budgeting","financelearning","investing","saving","moneyplanning",
+
+"charity","helping","kindness","volunteer","community","teamwork",
+
+"mindset","selfimprovement","personaldevelopment","confidence","focuswork",
+
+"deepwork","timemanagement","planningday","reviewday","weeklyreview",
+
+"breathwork","coldshower","sunrisewalk","eveningwalk","naturewalk",
+
+"gymdone","workoutdone","rundone","walkdone","readdone","yogadone","meditated","hydrated"]):
 
         daily_scores[user] += 2
 
