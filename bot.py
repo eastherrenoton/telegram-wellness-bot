@@ -26,7 +26,7 @@ from groq import Groq
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-GROUP_ID = -1003843542076
+GROUP_ID = -3843542076
 
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN not found")
