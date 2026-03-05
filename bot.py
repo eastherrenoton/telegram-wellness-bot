@@ -75,14 +75,13 @@ Friendly tone.
 
 async def react_to_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    emojis = ["🎉","👏","🔥","💪","🥳","✨","🙌"]
+    emojis = ["🎉","👏","🔥","💪","🥳","✨"]
 
     await context.bot.set_message_reaction(
-        chat_id=GROUP_ID,
+        chat_id=update.effective_chat.id,
         message_id=update.message.message_id,
         reaction=[ReactionTypeEmoji(random.choice(emojis))]
     )
-
 # =========================
 # SEND NORMAL POLL
 # =========================
