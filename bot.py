@@ -93,11 +93,13 @@ async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE)
     user = answer.user.first_name
     option = answer.option_ids[0]
 
+    topic = active_polls.get(answer.poll_id, "a healthy habit")
+
     if option == 0:
         daily_scores[user] += 1
-        message = ai_message(f"congratulate {user} for following healthy habit")
+        message = ai_message(f"congratulate {user} for doing this healthy habit: {topic}")
     else:
-        message = ai_message(f"encourage {user} to take a short refreshment break")
+        message = ai_message(f"encourage {user} to try this healthy habit later: {topic}")
 
     await context.bot.send_message(
         chat_id=GROUP_ID,
