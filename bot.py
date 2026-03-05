@@ -1,7 +1,7 @@
 import os
 import threading
 import random
-from datetime import datetime
+import asyncio
 from collections import defaultdict
 from flask import Flask
 import pytz
@@ -18,6 +18,7 @@ from telegram.ext import (
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from groq import Groq
 
+
 # =========================
 # ENV VARIABLES
 # =========================
@@ -33,11 +34,13 @@ if not BOT_TOKEN:
 if not GROQ_API_KEY:
     raise ValueError("GROQ_API_KEY not found")
 
+
 # =========================
 # GROQ CLIENT
 # =========================
 
 client = Groq(api_key=GROQ_API_KEY)
+
 
 # =========================
 # STORAGE
@@ -46,8 +49,9 @@ client = Groq(api_key=GROQ_API_KEY)
 daily_scores = defaultdict(int)
 active_polls = {}
 
+
 # =========================
-# AI MESSAGE
+# AI MESSAGE GENERATOR
 # =========================
 
 def ai_message(topic):
@@ -68,6 +72,7 @@ Maximum 2 sentences.
 
     return chat_completion.choices[0].message.content.strip()
 
+
 # =========================
 # EMOJI REACTION
 # =========================
@@ -81,6 +86,7 @@ async def react_to_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_id=update.message.message_id,
         reaction=[ReactionTypeEmoji(random.choice(emojis))]
     )
+
 
 # =========================
 # NORMAL POLL
@@ -98,6 +104,7 @@ async def send_poll(app, topic):
     )
 
     active_polls[poll.poll.id] = topic
+
 
 # =========================
 # MORNING HABIT POLL
@@ -122,6 +129,7 @@ async def send_habit_poll(app):
 
     active_polls[poll.poll.id] = "morning habit"
 
+
 # =========================
 # BREAK POLL
 # =========================
@@ -140,6 +148,7 @@ async def send_break_poll(app):
 
     active_polls[poll.poll.id] = "break"
 
+
 # =========================
 # WATER REMINDER
 # =========================
@@ -153,13 +162,28 @@ async def water_reminder(app):
         text=f"💧 {msg}"
     )
 
+
 # =========================
-# HEARTBEAT EVERY 10 MIN
+# HEARTBEAT EVERY 5 MIN
 # =========================
 
 async def heartbeat(app):
 
-    print("Keep hydrated guys❤️")
+    msg = await app.bot.send_message(
+        chat_id=GROUP_ID,
+        text="💧 Stay hydrated guys ❤️"
+    )
+
+    await asyncio.sleep(10)
+
+    try:
+        await app.bot.delete_message(
+            chat_id=GROUP_ID,
+            message_id=msg.message_id
+        )
+    except:
+        pass
+
 
 # =========================
 # POLL ANSWER HANDLER
@@ -183,6 +207,7 @@ async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE)
         chat_id=GROUP_ID,
         text=message
     )
+
 
 # =========================
 # MESSAGE HANDLER
@@ -218,6 +243,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(message)
 
+
 # =========================
 # DAILY WINNER
 # =========================
@@ -237,6 +263,7 @@ async def daily_winner(app):
     )
 
     daily_scores.clear()
+
 
 # =========================
 # SCHEDULER
@@ -267,10 +294,11 @@ def setup_schedule(app):
     # hourly water reminder
     scheduler.add_job(water_reminder,"interval",hours=1,args=[app])
 
-    # 10 minute heartbeat
+    # keep render alive every 5 minutes
     scheduler.add_job(heartbeat,"interval",minutes=5,args=[app])
 
     scheduler.start()
+
 
 # =========================
 # RENDER WEB SERVER
@@ -282,9 +310,11 @@ web_app = Flask(__name__)
 def home():
     return "Telegram Wellness Bot Running"
 
+
 def run_web():
     port = int(os.environ.get("PORT",10000))
     web_app.run(host="0.0.0.0",port=port)
+
 
 # =========================
 # MAIN
