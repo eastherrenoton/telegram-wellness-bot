@@ -268,7 +268,7 @@ def setup_schedule(app):
     scheduler.add_job(water_reminder,"interval",hours=1,args=[app])
 
     # 10 minute heartbeat
-    scheduler.add_job(heartbeat,"interval",minutes=10,args=[app])
+    scheduler.add_job(heartbeat,"interval",minutes=5,args=[app])
 
     scheduler.start()
 
